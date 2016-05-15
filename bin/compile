@@ -15,6 +15,7 @@ DEFAULT_CACHE="node_modules bower_components"
 ### Configure directories
 
 if [ ! -z $NODEJS_ROOT_PATH ]; then
+    ORIG_BUILD_DIR=${1:-}
     BUILD_DIR=${1:-}/$NODEJS_ROOT_PATH/
 else
   BUILD_DIR=${1:-}
@@ -63,7 +64,11 @@ warn_missing_package_json "$BUILD_DIR"
 ### Compile
 
 create_env() {
-  write_profile "$BP_DIR" "$BUILD_DIR"
+  if [ ! -z $NODEJS_ROOT_PATH ]; then
+   write_profile "$BP_DIR" "$ORIG_BUILD_DIR"
+  else
+    write_profile "$BP_DIR" "$BUILD_DIR"
+  fi
   write_export "$BP_DIR" "$BUILD_DIR"
   export_env_dir "$ENV_DIR"
   create_default_env
