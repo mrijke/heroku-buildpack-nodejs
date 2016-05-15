@@ -15,18 +15,19 @@ DEFAULT_CACHE="node_modules bower_components"
 ### Configure directories
 
 if [ ! -z $NODEJS_ROOT_PATH ]; then
-    ORIG_BUILD_DIR=${1:-}
-    BUILD_DIR=${1:-}/$NODEJS_ROOT_PATH/
+  ORIG_BUILD_DIR=${1:-}
+  BUILD_DIR=${1:-}/$NODEJS_ROOT_PATH/
 else
   BUILD_DIR=${1:-}
+  ORIG_BUILD_DIR=${1:-}
 fi
 CACHE_DIR=${2:-}
 ENV_DIR=${3:-}
 BP_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
 
-mkdir -p "$BUILD_DIR/.heroku/node/"
-cd $BUILD_DIR
-export PATH="$BUILD_DIR/.heroku/node/bin":$PATH
+mkdir -p "$ORIG_BUILD_DIR/.heroku/node/"
+cd $ORIG_BUILD_DIR
+export PATH="$ORIG_BUILD_DIR/.heroku/node/bin":$PATH
 
 LOG_FILE='/tmp/node-build-log.txt'
 echo "" > "$LOG_FILE"
@@ -64,11 +65,7 @@ warn_missing_package_json "$BUILD_DIR"
 ### Compile
 
 create_env() {
-  if [ ! -z $NODEJS_ROOT_PATH ]; then
-   write_profile "$BP_DIR" "$ORIG_BUILD_DIR"
-  else
-    write_profile "$BP_DIR" "$BUILD_DIR"
-  fi
+  write_profile "$BP_DIR" "$ORIG_BUILD_DIR"
   write_export "$BP_DIR" "$BUILD_DIR"
   export_env_dir "$ENV_DIR"
   create_default_env
@@ -93,12 +90,12 @@ install_bins() {
 
   if [ -n "$iojs_engine" ]; then
     warn_node_engine "$iojs_engine"
-    install_iojs "$iojs_engine" "$BUILD_DIR/.heroku/node"
+    install_iojs "$iojs_engine" "$ORIG_BUILD_DIR/.heroku/node"
     echo "Using bundled npm version for iojs compatibility: `npm --version`"
   else
     warn_node_engine "$node_engine"
-    install_nodejs "$node_engine" "$BUILD_DIR/.heroku/node"
-    install_npm "$npm_engine" "$BUILD_DIR/.heroku/node"
+    install_nodejs "$node_engine" "$ORIG_BUILD_DIR/.heroku/node"
+    install_npm "$npm_engine" "$ORIG_BUILD_DIR/.heroku/node"
   fi
   warn_old_npm
 }
